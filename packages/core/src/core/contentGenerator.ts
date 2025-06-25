@@ -129,11 +129,20 @@ export async function createContentGenerator(
     config.authType === AuthType.USE_GEMINI ||
     config.authType === AuthType.USE_VERTEX_AI
   ) {
-    const googleGenAI = new GoogleGenAI({
+    // Support custom API endpoint via environment variable
+    const customEndpoint = process.env.GEMINI_API_ENDPOINT || process.env.GOOGLE_GENAI_ENDPOINT;
+    const googleGenAIConfig: any = {
       apiKey: config.apiKey === '' ? undefined : config.apiKey,
       vertexai: config.vertexai,
       httpOptions,
-    });
+    };
+    
+    // Add baseUrl if custom endpoint is specified
+    if (customEndpoint) {
+      googleGenAIConfig.baseUrl = customEndpoint;
+    }
+    
+    const googleGenAI = new GoogleGenAI(googleGenAIConfig);
 
     return googleGenAI.models;
   }
